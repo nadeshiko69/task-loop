@@ -1,5 +1,5 @@
 # task-loop
-Task-Life（Task-L）
+家族をタスケル、Task-L
 
 ## ※Security
 - 環境変数は `.env` で管理
