@@ -1,15 +1,91 @@
-# env
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+*.code-workspace
+
+# Flutter / Dart / Pub
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/coverage/
+*.lcov
+
+# Symbolication / obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android build outputs
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/local.properties
+
+# FVM
+.fvm/flutter_sdk
+.fvm/versions
+
+# env / local secrets
 .env
 .env.*
+!.env.example
 
-# database
+# local databases
 *.db
 *.sqlite
+*.sqlite3
 
-# python
+# Python (sql 作業用)
 __pycache__/
-*.pyc
+.venv/
+venv/
 
-# editor
-.vscode/
-.idea/
+# Firebase generated credentials
+# flutterfire configure が上書きする。雛形は firebase_options.example.dart
+lib/firebase_options.dart
+**/GoogleService-Info.plist
+**/google-services.json
+*.keystore
+*.jks
+key.properties
+*-firebase-adminsdk-*.json
+serviceAccount*.json
+
+# Firebase emulators / CLI
+.firebase/
+firebase-debug.log
+firestore-debug.log
+pubsub-debug.log
+ui-debug.log
+database-debug.log
+pglite-debug.log
+
+# CocoaPods (ios/.gitignore と重複してもよい)
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/

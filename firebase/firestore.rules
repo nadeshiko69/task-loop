@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isMember(householdId) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/households/$(householdId)/members/$(request.auth.uid));
+    }
+
+    match /users/{uid} {
+      allow read, create, update, delete: if isSelf(uid);
+    }
+
+    match /invites/{code} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+    }
+
+    match /households/{householdId} {
+      allow read: if isMember(householdId);
+      allow create: if signedIn();
+      allow update: if isMember(householdId);
+
+      match /members/{uid} {
+        allow read: if isMember(householdId);
+        allow create: if isSelf(uid);
+        allow delete: if isSelf(uid);
+      }
+
+      match /tasks/{taskId} {
+        allow read, create, update, delete: if isMember(householdId);
+
+        match /executions/{executionId} {
+          allow read, create: if isMember(householdId);
+        }
+      }
+    }
+  }
+}

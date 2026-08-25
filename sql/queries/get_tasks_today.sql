@@ -1,3 +1,6 @@
+-- 旧設計（カレンダー週 / period_key）。
+-- 実装は Firestore の lastExecutedAt + intervalDays に切り替え済み。
+
 -- GET /tasks/today
 -- 今日やるべきタスクを取得する
 
