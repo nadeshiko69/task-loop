@@ -4,13 +4,20 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-/// Apple ログインとアカウント削除だけを担当する。
+/// Apple ログインとアカウント削除を担当する。
+///
+/// Android の Debug ビルドだけ、開発用の匿名ログインも使える。
 class AuthRepository {
   AuthRepository({FirebaseAuth? auth}) : _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseAuth _auth;
+
+  /// リリースや iOS には出さない。Windows + Android 実装用。
+  static bool get allowsDevAnonymousSignIn =>
+      kDebugMode && Platform.isAndroid;
 
   Stream<User?> authState() => _auth.authStateChanges();
 
@@ -46,6 +53,19 @@ class AuthRepository {
     return AppleSignInResult(
       user: userCredential.user!,
       fullNameFromApple: fullName.isEmpty ? null : fullName,
+    );
+  }
+
+  /// Debug の Android 専用。Firebase Console で「匿名」を有効にすること。
+  Future<AppleSignInResult> signInAnonymouslyForDev() async {
+    if (!allowsDevAnonymousSignIn) {
+      throw StateError('開発用匿名ログインは Debug の Android のみです');
+    }
+
+    final userCredential = await _auth.signInAnonymously();
+    return AppleSignInResult(
+      user: userCredential.user!,
+      fullNameFromApple: '開発ユーザー',
     );
   }
 
