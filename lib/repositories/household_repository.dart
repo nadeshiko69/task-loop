@@ -92,6 +92,15 @@ class HouseholdRepository {
     await batch.commit();
   }
 
+  Future<Map<String, String>> fetchMemberDisplayNames(String householdId) async {
+    final snap =
+        await _firestore.collection(FirestorePaths.members(householdId)).get();
+    return {
+      for (final doc in snap.docs)
+        doc.id: HouseholdMember.fromDoc(doc).displayName,
+    };
+  }
+
   Future<void> leaveHousehold({
     required String uid,
     required String householdId,

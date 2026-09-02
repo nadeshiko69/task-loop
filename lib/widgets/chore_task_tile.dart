@@ -10,11 +10,13 @@ class ChoreTaskTile extends StatelessWidget {
     required this.task,
     required this.onComplete,
     required this.onArchive,
+    required this.onShowDetails,
   });
 
   final ChoreTask task;
   final VoidCallback onComplete;
   final VoidCallback onArchive;
+  final VoidCallback onShowDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -57,12 +59,19 @@ class ChoreTaskTile extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FilledButton(
-                onPressed: onComplete,
-                child: const Text('完了'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton(
+                  onPressed: onShowDetails,
+                  child: const Text('詳細'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: onComplete,
+                  child: const Text('完了'),
+                ),
+              ],
             ),
           ],
         ),

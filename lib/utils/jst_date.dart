@@ -40,4 +40,15 @@ class JstDate {
   static int daysBetween({required DateTime from, required DateTime to}) {
     return to.difference(from).inDays;
   }
+
+  /// 日本時間で `YYYY/MM/DD HH:mm` 形式にする。
+  static String formatDateTime(DateTime dateTime) {
+    final jst = dateTime.toUtc().add(offset);
+    final year = jst.year.toString().padLeft(4, '0');
+    final month = jst.month.toString().padLeft(2, '0');
+    final day = jst.day.toString().padLeft(2, '0');
+    final hour = jst.hour.toString().padLeft(2, '0');
+    final minute = jst.minute.toString().padLeft(2, '0');
+    return '$year/$month/$day $hour:$minute';
+  }
 }

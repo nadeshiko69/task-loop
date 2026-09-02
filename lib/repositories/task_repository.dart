@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../firebase/firestore_paths.dart';
 import '../models/chore_task.dart';
+import '../models/task_execution.dart';
 import '../utils/jst_date.dart';
 import '../utils/remaining_days.dart';
 
@@ -97,5 +98,18 @@ class TaskRepository {
     return _firestore.doc(FirestorePaths.task(householdId, taskId)).update({
       ChoreTaskFields.archived: true,
     });
+  }
+
+  Future<List<TaskExecution>> fetchRecentExecutions({
+    required String householdId,
+    required String taskId,
+    int limit = 50,
+  }) async {
+    final snap = await _firestore
+        .collection(FirestorePaths.executions(householdId, taskId))
+        .orderBy(TaskExecutionFields.executedAt, descending: true)
+        .limit(limit)
+        .get();
+    return snap.docs.map(TaskExecution.fromDoc).toList();
   }
 }

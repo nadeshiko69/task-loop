@@ -8,6 +8,7 @@ import '../widgets/chore_task_tile.dart';
 import '../widgets/error_snackbar.dart';
 import 'add_task_screen.dart';
 import 'settings_screen.dart';
+import 'task_detail_screen.dart';
 
 class TaskListScreen extends StatelessWidget {
   const TaskListScreen({
@@ -108,6 +109,16 @@ class TaskListScreen extends StatelessWidget {
                 task: task,
                 onComplete: () => _complete(context, task),
                 onArchive: () => _archive(context, task),
+                onShowDetails: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => TaskDetailScreen(
+                        householdId: household.id,
+                        task: task,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           );
