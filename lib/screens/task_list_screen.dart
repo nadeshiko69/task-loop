@@ -4,6 +4,7 @@ import '../models/app_user.dart';
 import '../models/chore_task.dart';
 import '../models/household.dart';
 import '../repositories/repositories.dart';
+import '../widgets/anchored_banner_ad.dart';
 import '../widgets/chore_task_tile.dart';
 import '../widgets/error_snackbar.dart';
 import 'add_task_screen.dart';
@@ -69,6 +70,7 @@ class TaskListScreen extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: const AnchoredBannerAd(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(

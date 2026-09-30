@@ -16,6 +16,7 @@ dependencies:
   cloud_firestore: ^6.9.0
   sign_in_with_apple: ^7.0.1
   crypto: ^3.0.7
+  google_mobile_ads: ^6.0.0
 
 dev_dependencies:
   flutter_test:

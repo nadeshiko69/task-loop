@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../ads/ads_service.dart';
 import '../repositories/repositories.dart';
 import '../widgets/error_snackbar.dart';
 
@@ -25,6 +26,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   static const _presets = [1, 7, 14, 30];
 
   @override
+  void initState() {
+    super.initState();
+    adsService.preloadInterstitial();
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     super.dispose();
@@ -39,6 +46,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         title: _titleController.text,
         intervalDays: _intervalDays,
       );
+      if (!mounted) {
+        return;
+      }
+      await adsService.showInterstitialAfterTaskAdded();
       if (mounted) {
         Navigator.of(context).pop();
       }
