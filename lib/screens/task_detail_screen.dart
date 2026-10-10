@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/chore_task.dart';
 import '../models/task_execution.dart';
 import '../repositories/repositories.dart';
+import '../utils/execution_share.dart';
 import '../utils/jst_date.dart';
 
 class TaskDetailScreen extends StatefulWidget {
@@ -90,19 +91,39 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: data.executions.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final execution = data.executions[index];
-              return ListTile(
-                title: Text(
-                  _executorName(data.memberNames, execution.executedBy),
+          final shareSummary = summarizeExecutionShares(
+            data.executions.map((execution) => execution.executedBy),
+          );
+
+          return ListView(
+            padding: const EdgeInsets.only(bottom: 24),
+            children: [
+              _ExecutionShareSection(
+                summary: shareSummary,
+                nameFor: (uid) => _executorName(data.memberNames, uid),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Text(
+                  '実行履歴',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                subtitle: Text(JstDate.formatDateTime(execution.executedAt)),
-              );
-            },
+              ),
+              for (var index = 0; index < data.executions.length; index++) ...[
+                if (index > 0) const Divider(height: 1),
+                ListTile(
+                  title: Text(
+                    _executorName(
+                      data.memberNames,
+                      data.executions[index].executedBy,
+                    ),
+                  ),
+                  subtitle: Text(
+                    JstDate.formatDateTime(data.executions[index].executedAt),
+                  ),
+                ),
+              ],
+            ],
           );
         },
       ),
@@ -118,4 +139,71 @@ class _TaskDetailData {
 
   final List<TaskExecution> executions;
   final Map<String, String> memberNames;
+}
+
+class _ExecutionShareSection extends StatelessWidget {
+  const _ExecutionShareSection({
+    required this.summary,
+    required this.nameFor,
+  });
+
+  final ExecutionShareSummary summary;
+  final String Function(String uid) nameFor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '直近${summary.sampleCount}回の実行割合',
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
+          for (final share in summary.shares) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    nameFor(share.executedBy),
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                ),
+                Text(
+                  '${share.count}回',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    '${share.percent}%',
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: share.percent / 100,
+                minHeight: 8,
+                backgroundColor: scheme.surfaceContainerHighest,
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+        ],
+      ),
+    );
+  }
 }
