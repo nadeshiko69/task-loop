@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/chore_task.dart';
 import '../utils/jst_date.dart';
 import 'remaining_days_badge.dart';
+import 'sparkle_burst.dart';
 
 class ChoreTaskTile extends StatelessWidget {
   const ChoreTaskTile({
@@ -91,13 +92,7 @@ class ChoreTaskTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onComplete,
-                    icon: const Icon(Icons.check_rounded, size: 18),
-                    label: const Text('できた'),
-                  ),
-                ),
+                Expanded(child: _DoneButton(onPressed: onComplete)),
               ],
             ),
           ],
@@ -112,6 +107,62 @@ class ChoreTaskTile extends StatelessWidget {
       return '家';
     }
     return String.fromCharCodes([trimmed.runes.first]);
+  }
+}
+
+class _DoneButton extends StatefulWidget {
+  const _DoneButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  State<_DoneButton> createState() => _DoneButtonState();
+}
+
+class _DoneButtonState extends State<_DoneButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pop;
+  late final CurvedAnimation _curve;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _pop = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _curve = CurvedAnimation(parent: _pop, curve: Curves.easeOut);
+    _scale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1, end: 0.94), weight: 35),
+      TweenSequenceItem(tween: Tween(begin: 0.94, end: 1.05), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1), weight: 25),
+    ]).animate(_curve);
+  }
+
+  @override
+  void dispose() {
+    _curve.dispose();
+    _pop.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scale,
+      child: FilledButton.icon(
+        onPressed: () {
+          showSparkleBurst(context);
+          if (!MediaQuery.disableAnimationsOf(context)) {
+            _pop.forward(from: 0);
+          }
+          widget.onPressed();
+        },
+        icon: const Icon(Icons.check_rounded, size: 18),
+        label: const Text('できた'),
+      ),
+    );
   }
 }
 
