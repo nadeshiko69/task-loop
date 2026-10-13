@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/chore_task.dart';
@@ -15,7 +17,7 @@ class ChoreTaskTile extends StatelessWidget {
   });
 
   final ChoreTask task;
-  final VoidCallback onComplete;
+  final Future<void> Function() onComplete;
   final VoidCallback onArchive;
   final VoidCallback onShowDetails;
 
@@ -110,10 +112,12 @@ class ChoreTaskTile extends StatelessWidget {
   }
 }
 
+const doneButtonCooldown = Duration(seconds: 5);
+
 class _DoneButton extends StatefulWidget {
   const _DoneButton({required this.onPressed});
 
-  final VoidCallback onPressed;
+  final Future<void> Function() onPressed;
 
   @override
   State<_DoneButton> createState() => _DoneButtonState();
@@ -124,6 +128,8 @@ class _DoneButtonState extends State<_DoneButton>
   late final AnimationController _pop;
   late final CurvedAnimation _curve;
   late final Animation<double> _scale;
+  Timer? _cooldown;
+  var _locked = false;
 
   @override
   void initState() {
@@ -142,9 +148,38 @@ class _DoneButtonState extends State<_DoneButton>
 
   @override
   void dispose() {
+    _cooldown?.cancel();
     _curve.dispose();
     _pop.dispose();
     super.dispose();
+  }
+
+  Future<void> _handlePressed() async {
+    if (_locked) {
+      return;
+    }
+    setState(() => _locked = true);
+    showSparkleBurst(context);
+    if (!MediaQuery.disableAnimationsOf(context)) {
+      _pop.forward(from: 0);
+    }
+    try {
+      await widget.onPressed();
+    } catch (_) {
+      _cooldown?.cancel();
+      if (mounted) {
+        setState(() => _locked = false);
+      }
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+    _cooldown = Timer(doneButtonCooldown, () {
+      if (mounted) {
+        setState(() => _locked = false);
+      }
+    });
   }
 
   @override
@@ -152,15 +187,13 @@ class _DoneButtonState extends State<_DoneButton>
     return ScaleTransition(
       scale: _scale,
       child: FilledButton.icon(
-        onPressed: () {
-          showSparkleBurst(context);
-          if (!MediaQuery.disableAnimationsOf(context)) {
-            _pop.forward(from: 0);
-          }
-          widget.onPressed();
-        },
+        onPressed: _locked ? null : _handlePressed,
+        style: FilledButton.styleFrom(
+          disabledBackgroundColor: const Color(0xFF6E9B7B),
+          disabledForegroundColor: Colors.white,
+        ),
         icon: const Icon(Icons.check_rounded, size: 18),
-        label: const Text('できた'),
+        label: Text(_locked ? 'できた！' : 'できた'),
       ),
     );
   }

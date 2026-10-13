@@ -19,7 +19,9 @@ void main() {
               createdAt: DateTime.utc(2026, 1, 1),
               createdBy: 'user',
             ),
-            onComplete: () => completed += 1,
+            onComplete: () async {
+              completed += 1;
+            },
             onArchive: () {},
             onShowDetails: () {},
           ),
@@ -31,8 +33,21 @@ void main() {
     expect(completed, 1);
     await tester.pump();
     expect(find.byKey(sparkleBurstKey), findsOneWidget);
+    expect(find.text('Done!'), findsOneWidget);
 
-    await tester.pump(const Duration(milliseconds: 800));
+    expect(find.text('できた！'), findsOneWidget);
+    final locked = tester
+        .widgetList<ButtonStyleButton>(
+          find.byWidgetPredicate((widget) => widget is ButtonStyleButton),
+        )
+        .singleWhere((button) => button.onPressed == null);
+    expect(locked.onPressed, isNull);
+
+    await tester.pump(const Duration(milliseconds: 1300));
     expect(find.byKey(sparkleBurstKey), findsNothing);
+    expect(find.text('できた！'), findsOneWidget);
+
+    await tester.pump(doneButtonCooldown);
+    expect(find.text('できた'), findsOneWidget);
   });
 }

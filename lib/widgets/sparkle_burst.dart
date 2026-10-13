@@ -60,7 +60,7 @@ class _SparkleLayerState extends State<_SparkleLayer>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 720),
+      duration: const Duration(milliseconds: 1200),
     );
     _controller.forward().whenComplete(_finish);
   }
@@ -82,18 +82,110 @@ class _SparkleLayerState extends State<_SparkleLayer>
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: IgnorePointer(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, _) {
-            return CustomPaint(
-              painter: _SparklePainter(
-                origin: widget.origin,
-                t: _controller.value,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          final t = _controller.value;
+          final sparkleT = (t / 0.6).clamp(0.0, 1.0);
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              ColoredBox(
+                color: Colors.black.withValues(alpha: _scrimOpacity(t)),
               ),
-              child: const SizedBox.expand(),
-            );
-          },
+              CustomPaint(
+                painter: _SparklePainter(origin: widget.origin, t: sparkleT),
+              ),
+              Center(
+                child: Opacity(
+                  opacity: _doneOpacity(t),
+                  child: Transform.scale(
+                    scale: _doneScale(t),
+                    child: const _DoneBadge(),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+double _scrimOpacity(double t) {
+  const peak = 0.32;
+  if (t < 0.12) {
+    return peak * (t / 0.12);
+  }
+  if (t < 0.62) {
+    return peak;
+  }
+  return peak * (1 - (t - 0.62) / 0.38).clamp(0.0, 1.0);
+}
+
+double _doneOpacity(double t) {
+  if (t < 0.08) {
+    return t / 0.08;
+  }
+  if (t < 0.68) {
+    return 1;
+  }
+  return (1 - (t - 0.68) / 0.32).clamp(0.0, 1.0);
+}
+
+double _doneScale(double t) {
+  if (t < 0.22) {
+    final scale = Curves.easeOutBack.transform(t / 0.22);
+    if (scale < 0) {
+      return 0;
+    }
+    return scale;
+  }
+  return 1;
+}
+
+class _DoneBadge extends StatelessWidget {
+  const _DoneBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      label: 'できた',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 22),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 24,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.auto_awesome_rounded,
+              color: Color(0xFFE07A5F),
+              size: 36,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Done!',
+              style: TextStyle(
+                color: Color(0xFF3A2E29),
+                fontSize: 40,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.6,
+                height: 1,
+              ),
+            ),
+          ],
         ),
       ),
     );

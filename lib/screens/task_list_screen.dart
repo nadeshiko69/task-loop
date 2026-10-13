@@ -32,6 +32,7 @@ class TaskListScreen extends StatelessWidget {
       if (context.mounted) {
         showErrorSnackBar(context, error);
       }
+      rethrow;
     }
   }
 
@@ -103,6 +104,7 @@ class TaskListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final task = tasks[index];
               return ChoreTaskTile(
+                key: ValueKey(task.id),
                 task: task,
                 onComplete: () => _complete(context, task),
                 onArchive: () => _archive(context, task),
