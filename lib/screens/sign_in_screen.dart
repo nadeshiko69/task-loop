@@ -16,9 +16,7 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   bool _busy = false;
 
-  Future<void> _runSignIn(
-    Future<AppleSignInResult> Function() signIn,
-  ) async {
+  Future<void> _runSignIn(Future<AppleSignInResult> Function() signIn) async {
     setState(() => _busy = true);
     try {
       final result = await signIn();
@@ -43,6 +41,8 @@ class _SignInScreenState extends State<SignInScreen> {
     final showApple = Platform.isIOS;
     final showDevAnonymous = AuthRepository.allowsDevAnonymousSignIn;
 
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -51,20 +51,39 @@ class _SignInScreenState extends State<SignInScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Text(
-                'Task-L',
-                style: Theme.of(context).textTheme.displaySmall,
+              Container(
+                width: 72,
+                height: 72,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.home_rounded,
+                  size: 36,
+                  color: scheme.onPrimaryContainer,
+                ),
               ),
+              const SizedBox(height: 20),
+              Text('Task-L', style: Theme.of(context).textTheme.displaySmall),
               const SizedBox(height: 8),
-              const Text('家族の家事を、最終実行日から数えて共有します。'),
+              Text(
+                '家族の家事を、いっしょに覚えます。\n最後にやった日から、次の目安がわかります。',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  height: 1.5,
+                ),
+              ),
               const Spacer(),
               if (showApple)
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _busy
-                        ? null
-                        : () => _runSignIn(authRepository.signInWithApple),
+                    onPressed:
+                        _busy
+                            ? null
+                            : () => _runSignIn(authRepository.signInWithApple),
                     child: Text(_busy ? 'ログイン中…' : 'Apple でサインイン'),
                   ),
                 ),
@@ -72,14 +91,13 @@ class _SignInScreenState extends State<SignInScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _busy
-                        ? null
-                        : () => _runSignIn(
+                    onPressed:
+                        _busy
+                            ? null
+                            : () => _runSignIn(
                               authRepository.signInAnonymouslyForDev,
                             ),
-                    child: Text(
-                      _busy ? 'ログイン中…' : '開発用ログイン（匿名）',
-                    ),
+                    child: Text(_busy ? 'ログイン中…' : '開発用ログイン（匿名）'),
                   ),
                 ),
                 const SizedBox(height: 8),

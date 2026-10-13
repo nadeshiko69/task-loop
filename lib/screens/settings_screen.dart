@@ -28,9 +28,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('招待コードをコピーしました')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('招待コードをコピーしました')));
   }
 
   Future<void> _signOut() async {
@@ -47,8 +47,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: const Text('アカウントを削除しますか？'),
           content: const Text(
-            'この操作は取り消せません。世帯からは外れますが、'
-            '他の家族のタスクは残ります。',
+            'この操作は取り消せません。家族グループからは外れますが、'
+            'ほかの人の家事はそのまま残ります。',
           ),
           actions: [
             TextButton(
@@ -92,32 +92,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('設定')),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          ListTile(
-            title: const Text('招待コード'),
-            subtitle: Text(widget.household.inviteCode),
-            trailing: IconButton(
-              tooltip: 'コピー',
-              onPressed: _copyCode,
-              icon: const Icon(Icons.copy),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.key_rounded, color: scheme.primary),
+                  title: const Text('招待コード'),
+                  subtitle: Text(
+                    widget.household.inviteCode,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      letterSpacing: 4,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  trailing: IconButton(
+                    tooltip: 'コピー',
+                    onPressed: _copyCode,
+                    icon: const Icon(Icons.copy_rounded),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Text(
+                    'このコードを家族に伝えると、同じ一覧に参加できます。',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
             ),
           ),
-          ListTile(
-            title: const Text('ログイン中'),
-            subtitle: Text(widget.user.displayName),
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text('サインアウト'),
-            onTap: _busy ? null : _signOut,
-          ),
-          ListTile(
-            title: const Text('アカウントを削除'),
-            textColor: Theme.of(context).colorScheme.error,
-            onTap: _busy ? null : _deleteAccount,
+          const SizedBox(height: 12),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.person_rounded, color: scheme.secondary),
+                  title: const Text('いま使っている人'),
+                  subtitle: Text(widget.user.displayName),
+                ),
+                const Divider(indent: 16, endIndent: 16),
+                ListTile(
+                  title: const Text('サインアウト'),
+                  onTap: _busy ? null : _signOut,
+                ),
+                ListTile(
+                  title: const Text('アカウントを削除'),
+                  textColor: scheme.error,
+                  onTap: _busy ? null : _deleteAccount,
+                ),
+              ],
+            ),
           ),
         ],
       ),

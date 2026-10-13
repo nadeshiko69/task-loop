@@ -24,7 +24,7 @@ class RemainingDaysBadge extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(999),
@@ -32,9 +32,9 @@ class RemainingDaysBadge extends StatelessWidget {
       child: Text(
         remainingDaysLabel(remaining),
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.w600,
-            ),
+          color: foreground,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

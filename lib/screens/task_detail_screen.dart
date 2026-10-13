@@ -86,9 +86,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
           final data = snapshot.data!;
           if (data.executions.isEmpty) {
-            return const Center(
-              child: Text('まだ実行履歴がありません'),
-            );
+            return const _EmptyHistory();
           }
 
           final shareSummary = summarizeExecutionShares(
@@ -96,33 +94,55 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           );
 
           return ListView(
-            padding: const EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.only(top: 8, bottom: 24),
             children: [
               _ExecutionShareSection(
                 summary: shareSummary,
                 nameFor: (uid) => _executorName(data.memberNames, uid),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                 child: Text(
-                  '実行履歴',
+                  'いままでの記録',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              for (var index = 0; index < data.executions.length; index++) ...[
-                if (index > 0) const Divider(height: 1),
-                ListTile(
-                  title: Text(
-                    _executorName(
-                      data.memberNames,
-                      data.executions[index].executedBy,
-                    ),
-                  ),
-                  subtitle: Text(
-                    JstDate.formatDateTime(data.executions[index].executedAt),
-                  ),
+              Card(
+                child: Column(
+                  children: [
+                    for (
+                      var index = 0;
+                      index < data.executions.length;
+                      index++
+                    ) ...[
+                      if (index > 0)
+                        const Divider(height: 1, indent: 68, endIndent: 16),
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondaryContainer,
+                          foregroundColor:
+                              Theme.of(
+                                context,
+                              ).colorScheme.onSecondaryContainer,
+                          child: const Icon(Icons.person_rounded, size: 20),
+                        ),
+                        title: Text(
+                          _executorName(
+                            data.memberNames,
+                            data.executions[index].executedBy,
+                          ),
+                        ),
+                        subtitle: Text(
+                          JstDate.formatDateTime(
+                            data.executions[index].executedAt,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
+              ),
             ],
           );
         },
@@ -131,21 +151,45 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 }
 
+class _EmptyHistory extends StatelessWidget {
+  const _EmptyHistory();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.history_rounded, size: 40, color: scheme.primary),
+            const SizedBox(height: 12),
+            Text('まだ記録がありません', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(
+              '一覧で「できた」を押すと、ここに残ります。',
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TaskDetailData {
-  const _TaskDetailData({
-    required this.executions,
-    required this.memberNames,
-  });
+  const _TaskDetailData({required this.executions, required this.memberNames});
 
   final List<TaskExecution> executions;
   final Map<String, String> memberNames;
 }
 
 class _ExecutionShareSection extends StatelessWidget {
-  const _ExecutionShareSection({
-    required this.summary,
-    required this.nameFor,
-  });
+  const _ExecutionShareSection({required this.summary, required this.nameFor});
 
   final ExecutionShareSummary summary;
   final String Function(String uid) nameFor;
@@ -155,54 +199,56 @@ class _ExecutionShareSection extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '直近${summary.sampleCount}回の実行割合',
-            style: theme.textTheme.titleMedium,
-          ),
-          const SizedBox(height: 12),
-          for (final share in summary.shares) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    nameFor(share.executedBy),
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                ),
-                Text(
-                  '${share.count}回',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                SizedBox(
-                  width: 48,
-                  child: Text(
-                    '${share.percent}%',
-                    textAlign: TextAlign.end,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: share.percent / 100,
-                minHeight: 8,
-                backgroundColor: scheme.surfaceContainerHighest,
-              ),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '最近${summary.sampleCount}回、だれがやった？',
+              style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 14),
+            for (final share in summary.shares) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      nameFor(share.executedBy),
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ),
+                  Text(
+                    '${share.count}回',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 48,
+                    child: Text(
+                      '${share.percent}%',
+                      textAlign: TextAlign.end,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: share.percent / 100,
+                  minHeight: 10,
+                  backgroundColor: scheme.surfaceContainerHighest,
+                ),
+              ),
+              const SizedBox(height: 14),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

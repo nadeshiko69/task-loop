@@ -11,16 +11,16 @@ class SetupRequiredScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: ListView(
-            children: const [
-              SizedBox(height: 24),
+            children: [
+              const SizedBox(height: 24),
               Text(
                 'Firebase の接続がまだです',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               SizedBox(height: 16),
-              Text(
-                'iMac で次を実行すると、この画面は出なくなります。',
-              ),
+              Text('iMac で次を実行すると、この画面は出なくなります。'),
               SizedBox(height: 16),
               SelectableText(
                 '1. Firebase プロジェクトを作る\n'

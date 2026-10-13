@@ -59,10 +59,8 @@ class TaskListScreen extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => SettingsScreen(
-                    user: user,
-                    household: household,
-                  ),
+                  builder:
+                      (_) => SettingsScreen(user: user, household: household),
                 ),
               );
             },
@@ -75,15 +73,14 @@ class TaskListScreen extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => AddTaskScreen(
-                householdId: household.id,
-                uid: user.uid,
-              ),
+              builder:
+                  (_) =>
+                      AddTaskScreen(householdId: household.id, uid: user.uid),
             ),
           );
         },
-        icon: const Icon(Icons.add),
-        label: const Text('タスクを追加'),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('家事を追加'),
       ),
       body: StreamBuilder<List<ChoreTask>>(
         stream: taskRepository.watchActive(household.id),
@@ -97,9 +94,7 @@ class TaskListScreen extends StatelessWidget {
 
           final tasks = snapshot.data!;
           if (tasks.isEmpty) {
-            return const Center(
-              child: Text('まだタスクがありません。右下から追加できます。'),
-            );
+            return const _EmptyTaskList();
           }
 
           return ListView.builder(
@@ -114,10 +109,11 @@ class TaskListScreen extends StatelessWidget {
                 onShowDetails: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => TaskDetailScreen(
-                        householdId: household.id,
-                        task: task,
-                      ),
+                      builder:
+                          (_) => TaskDetailScreen(
+                            householdId: household.id,
+                            task: task,
+                          ),
                     ),
                   );
                 },
@@ -125,6 +121,50 @@ class TaskListScreen extends StatelessWidget {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class _EmptyTaskList extends StatelessWidget {
+  const _EmptyTaskList();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.home_rounded,
+                size: 36,
+                color: scheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('まだ家事がありません', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(
+              '右下の「家事を追加」から、\n家族で共有する家事を登録できます。',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
